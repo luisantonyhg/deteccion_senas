@@ -1,38 +1,45 @@
-name: Flutter CI
+name: Flutter CI Build and Upload
 
 on:
   push:
     branches:
-      - main
+      - main  # Ejecutar solo en la rama 'main'
   pull_request:
     branches:
-      - main
+      - main  # Ejecutar en pull requests hacia la rama 'main'
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Ejecutar en un entorno de Ubuntu
 
     steps:
+      # Paso 1: Checkout del código
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Flutter
+      # Paso 2: Configuración del Flutter SDK
+      - name: Setup Flutter SDK
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.0.0'
+          channel: stable         # Canal de Flutter (stable, beta, etc.)
+          flutter-version: 3.7.12 # Versión específica de Flutter
+          cache: true             # Usa caché para mejorar la velocidad
 
-      - name: Install dependencies
-        run: flutter pub get
+      # Paso 3: Descargar dependencias, limpiar y construir
+      - name: Flutter Pub Get and Build
+        run: |
+          flutter pub get         # Instala las dependencias
+          flutter clean           # Limpia cualquier residuo
+          flutter build apk       # Construye el APK en modo release
+          flutter build appbundle # Construye el AppBundle para Google Play
 
-      - name: Run tests
-        run: flutter test
-
-      - name: Build APK
-        run: flutter build apk --release
-
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v3
+      # Paso 4: Subir el APK generado
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v2
         with:
-          name: flutter-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: android-apk       # Nombre del artefacto
+          path: build/app/outputs/flutter-apk/app-release.apk # Ruta del APK
+
+     
+
 
