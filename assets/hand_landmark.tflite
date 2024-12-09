@@ -1,0 +1,150 @@
+import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
+import 'package:tflite/tflite.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+
+// Variables globales para las cámaras
+List<CameraDescription> cameras;
+
+// Función principal
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Inicializar las cámaras disponibles
+  cameras = await availableCameras();
+  runApp(MyApp());
+}
+
+// Widget principal de la aplicación
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+// Estado del widget principal
+class _MyAppState extends State<MyApp> {
+  CameraController _cameraController;
+  bool isDetecting = false;
+  FlutterTts flutterTts = FlutterTts();
+  String _detectionResult = '';
+
+  @override
+  void initState() {
+    super.initState();
+    loadModel();
+    initCamera();
+  }
+
+  // Inicializar la cámara
+  void initCamera() {
+    _cameraController = CameraController(
+      cameras[0],
+      ResolutionPreset.medium,
+      enableAudio: false,
+    );
+
+    _cameraController.initialize().then((_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {});
+
+      // Iniciar el stream de imágenes
+      _cameraController.startImageStream((CameraImage img) {
+        if (!isDetecting) {
+          isDetecting = true;
+          runModelOnFrame(img);
+        }
+      });
+    });
+  }
+
+  // Cargar el modelo de TensorFlow Lite
+  void loadModel() async {
+    String res;
+    res = await Tflite.loadModel(
+      model: "assets/model.tflite",
+      labels: "assets/labels.txt",
+    );
+    print("Modelo cargado: $res");
+  }
+
+  // Procesar los frames de la cámara
+  void runModelOnFrame(CameraImage image) async {
+    // Preprocesar la imagen para el modelo
+    var recognitions = await Tflite.runModelOnFrame(
+      bytesList: image.planes.map((plane) {
+        return plane.bytes;
+      }).toList(),
+      imageHeight: image.height,
+      imageWidth: image.width,
+      imageMean: 127.5, // Depende de cómo entrenaste el modelo
+      imageStd: 127.5,  // Depende de cómo entrenaste el modelo
+      rotation: 90,
+      numResults: 2,
+      threshold: 0.5,
+      asynch: true,
+    );
+
+    if (recognitions.isNotEmpty) {
+      var result = recognitions.first['label'];
+      print('Seña detectada: $result');
+
+      if (_detectionResult != result) {
+        // Si es una nueva detección, actualizar y hablar
+        setState(() {
+          _detectionResult = result;
+        });
+        speak(result);
+      }
+    }
+
+    isDetecting = false;
+  }
+
+  // Función para hablar el texto detectado
+  void speak(String text) async {
+    await flutterTts.setLanguage("es-ES");
+    await flutterTts.setPitch(1.0);
+    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.speak(text);
+  }
+
+  @override
+  void dispose() {
+    // Liberar recursos
+    _cameraController?.dispose();
+    Tflite.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_cameraController == null || !_cameraController.value.isInitialized) {
+      return Container();
+    }
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Detección de Señas en Tiempo Real'),
+        ),
+        body: Stack(
+          children: [
+            CameraPreview(_cameraController),
+            Positioned(
+              bottom: 20,
+              left: 20,
+              child: Text(
+                'Seña detectada: $_detectionResult',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  backgroundColor: Colors.black54,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

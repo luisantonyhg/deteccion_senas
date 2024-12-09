@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "579662559847",
+    "project_id": "deteccionsenas",
+    "storage_bucket": "deteccionsenas.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:579662559847:android:e1d7b4b4365d6d9d7032c2",
+        "android_client_info": {
+          "package_name": "com.luisantony.detencionsen"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvbzL0wbRgGIeFMMEC1ybheyMBQWDNNDU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
