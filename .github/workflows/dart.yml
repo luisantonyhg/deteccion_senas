@@ -22,4 +22,4 @@ jobs:
           flutter-version: '3.0.0'
 
       - name: Run Flutter doctor
-        run: flutter docto
+        run: flutter doctor
