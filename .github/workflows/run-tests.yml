@@ -1,0 +1,39 @@
+name: Run Tests
+
+on:
+  push:
+    branches: 
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.24.5
+          cache: true
+
+      - name: Run Tests
+        id: tests
+        run: |
+          flutter pub get
+          flutter test
+
+      # Este paso sólo se ejecutará si el paso anterior (Run Tests) tuvo éxito
+      - name: Test Correcto
+        if: success()
+        run: echo "Test correcto"
+
+      # Este paso sólo se ejecutará si el paso anterior (Run Tests) falló
+      - name: Test Fallido
+        if: failure()
+        run: echo "Hubo errores en los test"
