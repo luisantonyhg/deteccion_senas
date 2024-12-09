@@ -1,0 +1,41 @@
+name: CD to Google Play
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.24.5
+          cache: true
+
+      # Construir el APK en modo release
+      - name: Build Release APK
+        run: |
+          flutter pub get
+          flutter build apk --release
+
+      # Desplegar el APK a Google Play (ejemplo utilizando una acción de terceros)
+      # Necesitas configurar el secret GOOGLE_PLAY_SERVICE_ACCOUNT con tu credencial en GitHub
+      - name: Deploy to Google Play
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}
+          packageName: com.example.myapp
+          releaseFile: build/app/outputs/flutter-apk/app-release.apk
+          track: internal
