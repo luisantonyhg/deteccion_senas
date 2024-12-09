@@ -3,38 +3,44 @@ name: Flutter CI
 on:
   push:
     branches:
-      - main  # Ejecutar solo en la rama 'main'
+      - main
   pull_request:
     branches:
-      - main  # Ejecutar en pull requests hacia la rama 'main'
+      - main
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Ejecutar en un entorno de Ubuntu
+    runs-on: ubuntu-latest
 
     steps:
       # Paso 1: Checkout del código
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Paso 2: Configuración del Flutter SDK
+      # Paso 2: Configurar JDK 17, requerido por el Android Gradle plugin
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+
+      # Paso 3: Configuración del Flutter SDK
       - name: Setup Flutter SDK
         uses: subosito/flutter-action@v2
         with:
-          channel: stable        # Canal de Flutter
-          flutter-version: 3.24.5 # Versión específica de Flutter
-          cache: true             # Usa caché para mejorar la velocidad
+          channel: stable
+          flutter-version: 3.24.5
+          cache: true
 
-      # Paso 3: Descargar dependencias, limpiar y construir
+      # Paso 4: Obtener dependencias, limpiar y construir el APK
       - name: Flutter Pub Get and Build
         run: |
-          flutter pub get         # Instala las dependencias
-          flutter clean           # Limpia cualquier residuo previo
-          flutter build apk --release # Construye el APK en modo release
+          flutter pub get
+          flutter clean
+          flutter build apk --release
 
-      # Paso 4: Subir el APK generado como artefacto
+      # Paso 5: Subir el APK generado como artefacto descargable
       - name: Upload APK artifact
         uses: actions/upload-artifact@v3
         with:
-          name: android-apk       # Nombre del artefacto en GitHub
-          path: build/app/outputs/flutter-apk/app-release.apk # Ruta del APK generado
+          name: android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
