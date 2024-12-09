@@ -1,4 +1,4 @@
-name: Flutter CI Build and Upload
+name: Flutter CI
 
 on:
   push:
@@ -21,25 +21,20 @@ jobs:
       - name: Setup Flutter SDK
         uses: subosito/flutter-action@v2
         with:
-          channel: stable         # Canal de Flutter (stable, beta, etc.)
-          flutter-version: 3.7.12 # Versión específica de Flutter
+          channel: stable        # Canal de Flutter
+          flutter-version: 3.24.5 # Versión específica de Flutter
           cache: true             # Usa caché para mejorar la velocidad
 
       # Paso 3: Descargar dependencias, limpiar y construir
       - name: Flutter Pub Get and Build
         run: |
           flutter pub get         # Instala las dependencias
-          flutter clean           # Limpia cualquier residuo
-          flutter build apk       # Construye el APK en modo release
-          flutter build appbundle # Construye el AppBundle para Google Play
+          flutter clean           # Limpia cualquier residuo previo
+          flutter build apk --release # Construye el APK en modo release
 
-      # Paso 4: Subir el APK generado
-      - name: Upload Android APK
-        uses: actions/upload-artifact@v2
+      # Paso 4: Subir el APK generado como artefacto
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v3
         with:
-          name: android-apk       # Nombre del artefacto
-          path: build/app/outputs/flutter-apk/app-release.apk # Ruta del APK
-
-     
-
-
+          name: android-apk       # Nombre del artefacto en GitHub
+          path: build/app/outputs/flutter-apk/app-release.apk # Ruta del APK generado
