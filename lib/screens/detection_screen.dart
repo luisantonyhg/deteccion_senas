@@ -51,7 +51,7 @@ class DetectionScreen extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "Detección de Señales",
+                          "Detección de Señales1",
                           style: TextStyle(
                             fontFamily: 'Figtree',
                             fontWeight: FontWeight.w900,
