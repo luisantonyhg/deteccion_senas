@@ -80,7 +80,7 @@ class _RealTimeCameraScreenState extends State<RealTimeCameraScreen> {
       final base64Image = base64Encode(bytes);
 
       final response = await http.post(
-        Uri.parse('https://09dd-132-251-2-227.ngrok-free.app/process_image'),
+        Uri.parse('https://3321-132-251-3-60.ngrok-free.app/process_image'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({'image': base64Image}),
       );
